@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="https://img.icons8.com/ios-filled/50/000000/checklist.png" />
+    <title>To-Do App</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #f4f4f9; }
+        input[type="text"] { padding: 10px; width: 80%; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 10px; }
+        button { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        .task { margin: 10px 0; }
+        .completed { text-decoration: line-through; color: gray; }
+        .task-list { list-style: none; padding: 0; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+    <h1>Simple To-Do App</h1>
+    <input type="text" id="taskInput" placeholder="Enter a new task..." />
+    <button onclick="addTask()">Add Task</button>
+    
+    <ul id="taskList" class="task-list"></ul>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = 'task-item';
+                li.innerHTML = \`
+                    <span class="task \${task.completed ? 'completed' : ''}" onclick="toggleTask(\${index})">\${task.text}</span>
+                    <button onclick="deleteTask(\${index})">Delete</button>
+                \`;
+                taskList.appendChild(li);
+            });
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim();
+            if (taskText) {
+                tasks.push({ text: taskText, completed: false });
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                taskInput.value = '';
+                renderTasks();
+            }
+        }
+
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        window.onload = renderTasks;
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+</body>
+</html>
